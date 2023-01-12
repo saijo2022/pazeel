@@ -1,151 +1,136 @@
-let taslar = ["t0","t1","t2","t3","t4","t5","t6","t7","t8"]
+// グローバル
+// div要素を格納
+var cards = [];
+// 開始時間
+var startTime;
+// 経過秒数用 タイマーID
+var timer;
+// カードめくり用 タイマーID
+var backTimer;
+// 1枚目かどうかのフラグ   1枚目: true   2枚目: false
+var flgFirst = true;
+// 1枚目のカードを格納
+var cardFirst;
+// そろえた枚数
+var countUnit = 0;
 
-function tasBul(val){
-
-    for (i = 0; i < taslar.length; i++) { 
-
-            if(document.getElementById(taslar[i]).firstChild.data == val){
-
-                return(taslar[i])
-
-            }
-
-        }
-
-}
-
-function degisme(id, bosTasId){
-
-    let yakinlar = []
-
-    if([2,5,8].includes(parseInt(bosTasId[1]))){
-
-        yakinlar = [+3,-3,-1]
-
-    }else if([0,3,6].includes(parseInt(bosTasId[1]))){
-
-        yakinlar = [+3,+1,-3]
-
-    }else{
-
-        yakinlar = [+3,+1,-3,-1]
-
-    }
-
-    for(i = 0; i < taslar.length; i++){
-
-        if(parseInt(bosTasId[1])+parseInt(yakinlar[i]) == parseInt(id[1])){
-
-            return(true);
-
-        }
-
-    }
-
-    return(false)
-
-}
-
-function pushed(id){
-
-    var btn = document.getElementById(id);
-
-    if (btn.firstChild.data!=" "){
-
-        bosTasId = tasBul(" ") 
-
-        if(degisme(id, bosTasId) == false) return;
-
-        document.getElementById(bosTasId).firstChild.data = btn.firstChild.data;
-
-        btn.firstChild.data = " "
-
-    }
-
-}
-
-function solvable(rndList){
-
-    var count = 0;
-
-    for(i=0;i<rndList.length-1;i++){
-
-        if(rndList[i] == 0){
-
-            continue;
-
-        }
-
-        for(j=i+1;j<rndList.length;j++){
-
-            if(rndList[j] == 0){
-
-                continue;
-
-            }else if(rndList[i]>rndList[j]){
-
-                count++;
-
-            }
-
-        }
-
-    }
-
+window.onload = function(){
+    // 数字格納 一時配列
+    var arr = [];
     
-
-    if(count%2 == 0){
-
-        return(true);
-
-    }else{
-
-        return(false);
-
+    for (var i = 0; i < 10; i++){
+        // ペアの数字を10組
+        arr.push(i);
+        arr.push(i);
     }
-
+    
+    // シャッフル
+    shuffle(arr);
+    
+    var panel = document.getElementById('panel');
+    
+    // div要素作成
+    for (i = 0; i < 20; i++){
+        var div = document.createElement('div');
+        div.className = 'card back';
+        div.index = i;
+        div.number = arr[i];
+        div.innerHTML = '';
+        div.onclick = turn;
+        panel.appendChild(div);
+        cards.push(div);
+    }
+    // 開始時刻を取得
+    startTime = new Date();
+    // タイマー開始
+    startTimer();
+    
 }
 
-function randomTaslar(){
+// シャッフル用関数
+function shuffle(arr) {
+    var n = arr.length;
+    var temp, i;
 
-    var rndList = []
-
-    while(true){
-
-        rndList = []
-
-        while(rndList.length < 9){
-
-            var randomnumber = Math.ceil(Math.random()*9)-1
-
-            if(rndList.indexOf(randomnumber) > -1) continue;
-
-            rndList[rndList.length] = randomnumber;
-
-        }
-
-        if(solvable(rndList)){
-
-            break;
-
-        }
-
+    while (n) {
+        i = Math.floor(Math.random() * n--);
+        temp = arr[n];
+        arr[n] = arr[i];
+        arr[i] = temp;
     }
+    return arr;
+}
 
-    for (i = 0; i < taslar.length; i++) {
+// クリック時の処理
+function turn(e){
+    
+    var div = e.target;
+    
+    // カードのタイマー処理が動作中は return
+    if (backTimer) return;
 
-        if(rndList[i] == 0){
-
-            val = " "
-
-        }else{
-
-            val = rndList[i].toString()
-
-        }
-
-        document.getElementById(taslar[i]).firstChild.data = val
-
+    // 裏向きのカードをクリックした場合は数字を表示する
+    if (div.innerHTML == ''){
+        div.className = 'card';
+        div.innerHTML = div.number; 
+    }else{
+        // 数字が表示されているカードは return
+        return;
     }
+    
+    // 1枚目の処理
+    if (flgFirst){
+        // cardFirst は2枚目の処理のときに使う
+        cardFirst = div;
+        // フラグ変更
+        flgFirst = false;
+        
+    // 2枚目の処理
+    }else{
+        
+        // 数字が1枚目と一致する場合
+        if (cardFirst.number == div.number){
+            countUnit++;
+            // 見えない状態にする
+            backTimer = setTimeout(function(){
+                div.className = 'card finish';
+                cardFirst.className = 'card finish';
+                backTimer = NaN;
+                
+                if (countUnit == 10){
+                    clearInterval(timer);  // timer終了
+                }
+            }, 500)
 
+        // 一致しない場合
+        }else{  
+            // カードを裏側に戻す
+            backTimer = setTimeout(function(){
+                div.className = 'card back';
+                div.innerHTML = '';
+                cardFirst.className = 'card back';
+                cardFirst.innerHTML = '';
+                cardFirst = null;
+                backTimer = NaN;
+            }, 500);
+        }
+        
+        flgFirst = true;
+    }  
+}
+
+// タイマー開始
+function startTimer(){
+    timer = setInterval(showSecond, 1000);
+}
+
+// 秒数表示
+function showSecond(){
+
+    var nowTime = new Date();
+    var elapsedTime = Math.floor((nowTime - startTime) / 1000);
+    var str = '経過秒数: ' + elapsedTime + '秒';
+
+    var re = document.getElementById('result');
+    re.innerHTML = str;
 }
