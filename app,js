@@ -1,136 +1,120 @@
-// グローバル
-// div要素を格納
-var cards = [];
-// 開始時間
-var startTime;
-// 経過秒数用 タイマーID
-var timer;
-// カードめくり用 タイマーID
-var backTimer;
-// 1枚目かどうかのフラグ   1枚目: true   2枚目: false
-var flgFirst = true;
-// 1枚目のカードを格納
-var cardFirst;
-// そろえた枚数
-var countUnit = 0;
+  // 全てのカード情報を入れる配列を宣言
+  const cards = [];
+  
+  // s : スペード, d : ダイヤ, h : ハート, c : クローバー
+  const suits = ["s", "d", "h", "c"];
 
-window.onload = function(){
-    // 数字格納 一時配列
-    var arr = [];
-    
-    for (var i = 0; i < 10; i++){
-        // ペアの数字を10組
-        arr.push(i);
-        arr.push(i);
+  function Card(suit, num) {
+    //  this.suit = suit;
+    //  this.num = num;
+        this.front = `${this.suit}${('0'+this.num).slice(-2)}.png`;
     }
-    
-    // シャッフル
-    shuffle(arr);
-    
-    var panel = document.getElementById('panel');
-    
-    // div要素作成
-    for (i = 0; i < 20; i++){
-        var div = document.createElement('div');
-        div.className = 'card back';
-        div.index = i;
-        div.number = arr[i];
-        div.innerHTML = '';
-        div.onclick = turn;
-        panel.appendChild(div);
-        cards.push(div);
+  
+    function shuffleCard() {
+    //  const shuffled = shuffle(cards);
+    //  for (let i = 0; i < suits.length; i++) {
+    //    const tr = document.createElement("tr");
+    //    table3.appendChild(tr);
+    //    for (let j = 0; j < 13; j++) {
+    //      const td = document.createElement("td");
+            td.style.backgroundImage = `url(img/${shuffled[i * 13 + j].front})`;
+    //      tr.appendChild(td);
+    //    }
+    //  }
     }
-    // 開始時刻を取得
-    startTime = new Date();
-    // タイマー開始
-    startTimer();
-    
-}
 
-// シャッフル用関数
-function shuffle(arr) {
-    var n = arr.length;
-    var temp, i;
-
-    while (n) {
-        i = Math.floor(Math.random() * n--);
-        temp = arr[n];
-        arr[n] = arr[i];
-        arr[i] = temp;
+  // カード情報を配列に格納
+  for (let i = 0; i < suits.length; i++) {
+    for (let j = 1; j <= 13; j++) {
+      let card = new Card(suits[i], j);
+      cards.push(card);
     }
-    return arr;
-}
+  }
 
-// クリック時の処理
-function turn(e){
-    
-    var div = e.target;
-    
-    // カードのタイマー処理が動作中は return
-    if (backTimer) return;
-
-    // 裏向きのカードをクリックした場合は数字を表示する
-    if (div.innerHTML == ''){
-        div.className = 'card';
-        div.innerHTML = div.number; 
-    }else{
-        // 数字が表示されているカードは return
-        return;
+  const table = document.querySelector(".table");
+  
+  // テーブルに表示
+  for (let i = 0; i < suits.length; i++) {
+    const tr = document.createElement("tr");
+    table.appendChild(tr);            
+    for (let j = 0; j < 13; j++) {
+      const td = document.createElement("td");
+      // 1行目 0 * 13 + j = 0 ~ 12
+      // 2行目 1 * 13 + j = 13 ~ 25
+      // 3行目 2 * 13 + j = 26 ~ 38
+      // 4行目 3 * 13 + j = 39 ~ 51
+      td.innerHTML = cards[i*13+j].suit + "" + cards[i*13+j].num;
+      tr.appendChild(td)
     }
-    
-    // 1枚目の処理
-    if (flgFirst){
-        // cardFirst は2枚目の処理のときに使う
-        cardFirst = div;
-        // フラグ変更
-        flgFirst = false;
-        
-    // 2枚目の処理
-    }else{
-        
-        // 数字が1枚目と一致する場合
-        if (cardFirst.number == div.number){
-            countUnit++;
-            // 見えない状態にする
-            backTimer = setTimeout(function(){
-                div.className = 'card finish';
-                cardFirst.className = 'card finish';
-                backTimer = NaN;
-                
-                if (countUnit == 10){
-                    clearInterval(timer);  // timer終了
-                }
-            }, 500)
-
-        // 一致しない場合
-        }else{  
-            // カードを裏側に戻す
-            backTimer = setTimeout(function(){
-                div.className = 'card back';
-                div.innerHTML = '';
-                cardFirst.className = 'card back';
-                cardFirst.innerHTML = '';
-                cardFirst = null;
-                backTimer = NaN;
-            }, 500);
+  }
+    // シャッフルする関数
+    function shuffle(arrays) {
+        const array = arrays.slice();
+        for (let i = array.length - 1; i >= 0; i--) {
+          const randomIndex = Math.floor(Math.random() * (i + 1));
+          [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
         }
-        
-        flgFirst = true;
-    }  
-}
+        return array;
+      }
+    
+      // シャッフルし、HTML生成
+      function shuffleCard() {
+        //  const shuffled = shuffle(cards);
+        //  for (let i = 0; i < suits.length; i++) {
+        //    const tr = document.createElement("tr");
+        //    table3.appendChild(tr);
+        //    for (let j = 0; j < 13; j++) {
+        //      const td = document.createElement("td");
+                td.classList.add("card", "back");
+                td.onclick = flip;  // カードをクリックしたときの関数
+        //      td.style.backgroundImage = `url(img/${shuffled[i * 13 + j].front})`;
+        //      tr.appendChild(td);
+        //    }
+        //  }
+        }
+      shuffleCard(); 
+      function flipTest(e) {
+        let filipedCard = e.target;
+        filipedCard.classList.remove("back"); //カードを表にする。
+        flipTimerId = setTimeout(function () {
+          filipedCard.classList.add("back");
+        }, 1300);
+      }
 
-// タイマー開始
-function startTimer(){
-    timer = setInterval(showSecond, 1000);
-}
+  // 1枚目のカードの変数を宣言 最初はnull
+  let firstCard = null;
+  // setTimeoutを格納する変数
+  let flipTimerId = NaN;
 
-// 秒数表示
-function showSecond(){
-
-    var nowTime = new Date();
-    var elapsedTime = Math.floor((nowTime - startTime) / 1000);
-    var str = '経過秒数: ' + elapsedTime + '秒';
-
-    var re = document.getElementById('result');
-    re.innerHTML = str;
-}
+  // カードをめくった時の処理
+  function flip(e) {
+    let filipedCard = e.target;
+    // カードにクラスbackがついていないか、flipTimerIdが動作しているとき
+    if (!filipedCard.classList.contains("back") || flipTimerId) {
+      return; //表のカードをクリックしても何も反応させない。
+    }
+  
+    filipedCard.classList.remove("back"); //backを取り除いて、カードを表にする。
+  
+    // めくるのが1枚目の時
+    if (firstCard === null) {
+      firstCard = filipedCard; // めくったカードをfirstCardに設定
+    } else {
+      //2枚目だったら1枚目と比較して結果を判定する。
+      if (firstCard.num === filipedCard.num) {
+        //2枚が同じだった時、firstCardを初期値に戻す
+        firstCard = null;
+      } else {
+        // 2枚が違う数字だった時の処理
+        flipTimerId = setTimeout(function () {
+          // 2枚のカードを裏返す
+          firstCard.classList.add("back");
+          filipedCard.classList.add("back");
+          // 初期値に戻す
+          flipTimerId = NaN;
+          firstCard = null;
+        }, 1300);  // 1.3秒後に処理を完了
+      }
+    }
+  }
+  
