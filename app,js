@@ -2,7 +2,7 @@
   const cards = [];
   
   // s : スペード, d : ダイヤ, h : ハート, c : クローバー
-  const suits = ["s", "d", "h", "c"];
+  const suits = ["S", "D", "H", "C"];
 
   function Card(suit, num) {
     //  this.suit = suit;
@@ -117,4 +117,4 @@
       }
     }
   }
-  
+
